@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vertex — Custom Software That Scales</title>
+  <meta name="description" content="We build custom mobile apps, web applications, and enterprise software — from prototype to production in weeks, not months." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:   #F7F5F0;
+      --white:   #FFFFFF;
+      --ink:     #0D0D0D;
+      --ink-2:   #1A1A1A;
+      --ink-3:   #2C2C2C;
+      --muted:   #6B7280;
+      --border:  #E5E2DA;
+      --violet:  #7C3AED;
+      --violet-h:#6D28D9;
+      --violet-l:#EDE9FE;
+      --blue:    #2563EB;
+      --radius:  12px;
+      --radius-lg: 20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── UTILITIES ─────────────────────────────────────────── */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .container--narrow { max-width: 800px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+    /* ─── NAV ────────────────────────────────────────────────── */
+    #nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 20px 0;
+      transition: background 0.3s, box-shadow 0.3s, padding 0.3s;
+    }
+    #nav.scrolled {
+      background: rgba(13, 13, 13, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+      padding: 14px 0;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 0.05em;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-cta {
+      background: var(--violet);
+      color: var(--white) !important;
+      padding: 10px 22px;
+      border-radius: var(--radius);
+      font-weight: 600 !important;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--violet-h) !important; color: var(--white) !important; }
+    .nav-burger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-direction: column;
+      gap: 5px;
+      padding: 4px;
+    }
+    .nav-burger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-burger.open span:nth-child(2) { opacity: 0; }
+    .nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .nav-mobile {
+      display: none;
+      flex-direction: column;
+      background: var(--ink);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 20px 24px 28px;
+      gap: 4px;
+    }
+    .nav-mobile.open { display: flex; }
+    .nav-mobile a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 500;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .nav-mobile a:last-child { border-bottom: none; }
+    .nav-mobile .nav-cta {
+      margin-top: 12px;
+      display: inline-block;
+      padding: 14px 24px;
+      text-align: center;
+      border-radius: var(--radius);
+    }
+
+    /* ─── HERO ───────────────────────────────────────────────── */
+    #hero {
+      background: var(--ink);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 140px 0 100px;
+      position: relative;
+      overflow: hidden;
+    }
+    #hero::before {
+      content: '';
+      position: absolute;
+      top: -200px; right: -200px;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    #hero::after {
+      content: '';
+      position: absolute;
+      bottom: -150px; left: -100px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 28px;
+    }
+    .hero-eyebrow-dot {
+      width: 6px; height: 6px;
+      background: var(--violet);
+      border-radius: 50%;
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+    .hero-h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(64px, 10vw, 132px);
+      line-height: 0.92;
+      letter-spacing: 0.02em;
+      color: var(--white);
+      max-width: 900px;
+      margin-bottom: 28px;
+    }
+    .hero-h1 em {
+      font-style: normal;
+      color: var(--violet);
+      -webkit-text-stroke: 0;
+    }
+    .hero-sub {
+      font-size: clamp(17px, 2.2vw, 22px);
+      color: rgba(255,255,255,0.65);
+      max-width: 560px;
+      line-height: 1.65;
+      margin-bottom: 44px;
+      font-weight: 400;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+    .btn-primary {
+      background: var(--violet);
+      color: var(--white);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 16px 32px;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover { background: var(--violet-h); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-ghost {
+      color: rgba(255,255,255,0.8);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      padding: 16px 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s;
+    }
+    .btn-ghost:hover { color: var(--white); }
+    .btn-ghost svg { transition: transform 0.2s; }
+    .btn-ghost:hover svg { transform: translateX(3px); }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      margin-top: 64px;
+      padding-top: 48px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .hero-stat { display: flex; flex-direction: column; gap: 4px; }
+    .hero-stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 40px;
+      letter-spacing: 0.02em;
+      color: var(--white);
+      line-height: 1;
+    }
+    .hero-stat-label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+
+    /* ─── PROOF BAR ──────────────────────────────────────────── */
+    #proof {
+      background: var(--white);
+      padding: 48px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .proof-label {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+    .proof-logos {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+    }
+    .proof-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      color: #B0A898;
+      transition: color 0.2s;
+      white-space: nowrap;
+    }
+    .proof-logo:hover { color: var(--ink); }
+    .proof-logo span { font-weight: 300; }
+
+    /* ─── SECTION SHARED ─────────────────────────────────────── */
+    .section { padding: 96px 0; }
+    .section-dark { background: var(--ink); color: var(--white); }
+    .section-cream { background: var(--cream); }
+    .section-white { background: var(--white); }
+    .section-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+    .section-tag--violet { background: var(--violet-l); color: var(--violet); }
+    .section-tag--dark { background: rgba(124,58,237,0.15); color: #A78BFA; }
+    .section-h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(42px, 6vw, 80px);
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+      margin-bottom: 20px;
+    }
+    .section-sub {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+    }
+    .section-dark .section-sub { color: rgba(255,255,255,0.55); }
+    .section-header { margin-bottom: 64px; }
+    .section-header--center { text-align: center; }
+    .section-header--center .section-sub { margin: 0 auto; }
+
+    /* ─── SERVICES ───────────────────────────────────────────── */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .service-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      transition: box-shadow 0.25s, transform 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--violet), var(--blue));
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .service-card:hover { box-shadow: 0 20px 60px rgba(0,0,0,0.08); transform: translateY(-4px); }
+    .service-card:hover::before { opacity: 1; }
+    .service-icon {
+      width: 52px; height: 52px;
+      background: var(--violet-l);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .service-icon svg { color: var(--violet); }
+    .service-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 0.04em;
+      margin-bottom: 14px;
+      color: var(--ink);
+    }
+    .service-desc {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+    .service-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .service-tag {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 4px 10px;
+      border-radius: 100px;
+      background: var(--cream);
+      color: var(--ink-3);
+    }
+
+    /* ─── BENEFITS ───────────────────────────────────────────── */
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+    .benefit-card {
+      padding: 40px;
+      border: 1px solid rgba(255,255,255,0.07);
+      transition: background 0.2s;
+    }
+    .benefit-card:hover { background: rgba(255,255,255,0.03); }
+    .benefit-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 52px;
+      letter-spacing: 0.02em;
+      color: rgba(255,255,255,0.08);
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .benefit-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+    .benefit-desc {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.7;
+    }
+
+    /* ─── PROCESS ────────────────────────────────────────────── */
+    .process-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+    .process-step {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 32px;
+      padding: 40px 0;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .process-step:last-child { border-bottom: none; }
+    .process-step-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 56px;
+      color: var(--border);
+      line-height: 1;
+      letter-spacing: 0.02em;
+    }
+    .process-step-body {}
+    .process-step-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+    .process-step-desc {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .process-step-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--violet);
+      background: var(--violet-l);
+      padding: 3px 10px;
+      border-radius: 100px;
+      margin-bottom: 10px;
+    }
+
+    /* ─── PRICING ────────────────────────────────────────────── */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    .pricing-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+    .pricing-card:hover { border-color: rgba(255,255,255,0.18); }
+    .pricing-card--featured {
+      background: var(--violet);
+      border-color: var(--violet);
+      box-shadow: 0 0 80px rgba(124,58,237,0.35);
+    }
+    .pricing-card--featured:hover { border-color: var(--violet); }
+    .pricing-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--white);
+      color: var(--violet);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 16px;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+    .pricing-tier {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 14px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 12px;
+    }
+    .pricing-card--featured .pricing-tier { color: rgba(255,255,255,0.7); }
+    .pricing-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 62px;
+      letter-spacing: 0.01em;
+      color: var(--white);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .pricing-price-from {
+      font-size: 14px;
+      color: rgba(255,255,255,0.4);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .pricing-card--featured .pricing-price-from { color: rgba(255,255,255,0.6); }
+    .pricing-desc {
+      font-size: 14px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.6;
+      margin-bottom: 32px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .pricing-card--featured .pricing-desc { color: rgba(255,255,255,0.75); border-bottom-color: rgba(255,255,255,0.2); }
+    .pricing-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+    .pricing-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.5;
+    }
+    .pricing-card--featured .pricing-feature { color: rgba(255,255,255,0.9); }
+    .pricing-check {
+      width: 18px; height: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .btn-pricing {
+      display: block;
+      text-align: center;
+      padding: 14px 24px;
+      border-radius: var(--radius);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-pricing--outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.18);
+      color: var(--white);
+    }
+    .btn-pricing--outline:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.3); }
+    .btn-pricing--white {
+      background: var(--white);
+      color: var(--violet);
+    }
+    .btn-pricing--white:hover { background: var(--cream); }
+    .guarantee-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 48px;
+      padding: 18px 24px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+    }
+    .guarantee-bar svg { color: #22C55E; flex-shrink: 0; }
+    .guarantee-bar p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.5;
+    }
+    .guarantee-bar strong { color: var(--white); }
+
+    /* ─── TESTIMONIALS ────────────────────────────────────────── */
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .testimonial-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .testimonial-stars {
+      display: flex;
+      gap: 3px;
+    }
+    .testimonial-stars svg { color: #F59E0B; }
+    .testimonial-body {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--ink-3);
+      flex: 1;
+    }
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .testimonial-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--violet), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+    .testimonial-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .testimonial-role {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ─── FAQ ─────────────────────────────────────────────────── */
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 24px 0;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      transition: color 0.2s;
+    }
+    .faq-question:hover { color: var(--violet); }
+    .faq-icon {
+      width: 28px; height: 28px;
+      flex-shrink: 0;
+      background: var(--cream);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.3s;
+    }
+    .faq-icon svg { transition: transform 0.3s; }
+    .faq-item.open .faq-icon { background: var(--violet-l); }
+    .faq-item.open .faq-icon svg { transform: rotate(45deg); color: var(--violet); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s;
+    }
+    .faq-answer-inner {
+      padding-bottom: 24px;
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+    .faq-item.open .faq-answer { max-height: 500px; }
+
+    /* ─── FORM ────────────────────────────────────────────────── */
+    #contact {
+      background: var(--ink-2);
+      color: var(--white);
+      padding: 96px 0;
+    }
+    .contact-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .contact-info {}
+    .contact-promise {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-top: 44px;
+    }
+    .contact-promise-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .contact-promise-icon {
+      width: 40px; height: 40px;
+      background: rgba(124,58,237,0.15);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .contact-promise-text h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .contact-promise-text p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.6;
+    }
+    .form-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: var(--radius-lg);
+      padding: 44px;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .form-group:last-of-type { margin-bottom: 28px; }
+    .form-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.03em;
+    }
+    .form-input {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius);
+      padding: 13px 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      width: 100%;
+      -webkit-appearance: none;
+    }
+    .form-input:focus {
+      border-color: var(--violet);
+      background: rgba(124,58,237,0.08);
+    }
+    .form-input::placeholder { color: rgba(255,255,255,0.3); }
+    .form-input option { background: var(--ink); color: var(--white); }
+    .form-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--violet);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 0.01em;
+    }
+    .form-submit:hover { background: var(--violet-h); transform: translateY(-1px); }
+    .form-submit:active { transform: translateY(0); }
+    .form-disclaimer {
+      text-align: center;
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 14px;
+      line-height: 1.6;
+    }
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+    .form-success svg { color: #22C55E; margin: 0 auto 16px; display: block; }
+    .form-success h3 { font-size: 22px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+    .form-success p { font-size: 15px; color: rgba(255,255,255,0.55); }
+
+    /* ─── FINAL CTA ───────────────────────────────────────────── */
+    #cta-final {
+      background: var(--cream);
+      padding: 120px 0;
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+    }
+    #cta-final::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px; height: 400px;
+      background: radial-gradient(ellipse, rgba(124,58,237,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-final-h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(56px, 8vw, 110px);
+      line-height: 0.92;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      margin-bottom: 24px;
+    }
+    .cta-final-h2 em { font-style: normal; color: var(--violet); }
+    .cta-final-sub {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto 44px;
+      line-height: 1.7;
+    }
+    .cta-final-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+    }
+    .btn-primary-dark {
+      background: var(--ink);
+      color: var(--white);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 16px 32px;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary-dark:hover { background: var(--ink-3); transform: translateY(-1px); }
+    .btn-outline-dark {
+      background: transparent;
+      color: var(--ink);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 16px 32px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-outline-dark:hover { border-color: var(--ink); background: rgba(0,0,0,0.04); }
+
+    /* ─── FOOTER ─────────────────────────────────────────────── */
+    footer {
+      background: var(--ink);
+      color: rgba(255,255,255,0.45);
+      padding: 56px 0 40px;
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 48px;
+      flex-wrap: wrap;
+      padding-bottom: 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .footer-brand {}
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 30px;
+      letter-spacing: 0.05em;
+      color: var(--white);
+      text-decoration: none;
+      display: block;
+      margin-bottom: 12px;
+    }
+    .footer-tagline {
+      font-size: 14px;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.6;
+      max-width: 240px;
+    }
+    .footer-links {
+      display: flex;
+      gap: 64px;
+    }
+    .footer-col h4 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 16px;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col a {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-col a:hover { color: var(--white); }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+    }
+    .footer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(124,58,237,0.15);
+      color: #A78BFA;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 100px;
+    }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 960px) {
+      .services-grid { grid-template-columns: 1fr 1fr; }
+      .benefits-grid { grid-template-columns: 1fr 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+      .testimonials-grid { grid-template-columns: 1fr 1fr; }
+      .contact-wrap { grid-template-columns: 1fr; gap: 48px; }
+      .process-two-col { grid-template-columns: 1fr !important; gap: 48px !important; }
+      .faq-two-col { grid-template-columns: 1fr !important; gap: 48px !important; }
+      .faq-sticky { position: static !important; }
+    }
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .nav-burger { display: flex; }
+      .section { padding: 72px 0; }
+      .services-grid { grid-template-columns: 1fr; }
+      .benefits-grid { grid-template-columns: 1fr 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .footer-links { gap: 32px; }
+      .footer-inner { flex-direction: column; }
+      .hero-meta { gap: 24px; }
+    }
+    @media (max-width: 480px) {
+      .benefits-grid { grid-template-columns: 1fr; }
+      .proof-logos { gap: 28px; }
+      .process-step { grid-template-columns: 1fr; }
+      .process-step-num { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ───────────────────────────────────────────────────── -->
+<nav id="nav">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">Vertex</a>
+      <ul class="nav-links">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#process">Process</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#contact" class="nav-cta">Get a Free Estimate</a></li>
+      </ul>
+      <button class="nav-burger" id="navBurger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="nav-mobile" id="navMobile">
+    <a href="#services" class="nav-link-mobile">Services</a>
+    <a href="#process" class="nav-link-mobile">Process</a>
+    <a href="#pricing" class="nav-link-mobile">Pricing</a>
+    <a href="#faq" class="nav-link-mobile">FAQ</a>
+    <a href="#contact" class="nav-cta">Get a Free Estimate →</a>
+  </div>
+</nav>
+
+<!-- ─── HERO ───────────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-dot"></span>
+      Custom Software Studio — Est. 2018
+    </div>
+    <h1 class="hero-h1">
+      WE BUILD<br />
+      SOFTWARE<br />
+      THAT <em>SHIPS.</em>
+    </h1>
+    <p class="hero-sub">
+      Custom mobile apps, web platforms, and enterprise software built by a team
+      that ships on time — and sticks around to make sure it works.
+    </p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-primary">Get a Free Estimate →</a>
+      <a href="#process" class="btn-ghost">
+        See how we work
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-stat">
+        <span class="hero-stat-num">120+</span>
+        <span class="hero-stat-label">Projects shipped</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">97%</span>
+        <span class="hero-stat-label">On-time delivery</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">6yr</span>
+        <span class="hero-stat-label">Average client tenure</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">$0</span>
+        <span class="hero-stat-label">Surprise overages</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PROOF BAR ──────────────────────────────────────────────── -->
+<section id="proof">
+  <div class="container">
+    <p class="proof-label">Trusted by growth-stage companies and enterprise teams</p>
+    <div class="proof-logos">
+      <span class="proof-logo">Arc<span>tis</span></span>
+      <span class="proof-logo">Fend<span>er</span>Co</span>
+      <span class="proof-logo">Nova<span>path</span></span>
+      <span class="proof-logo">Lumen<span>io</span></span>
+      <span class="proof-logo">Stack<span>wise</span></span>
+      <span class="proof-logo">Prism<span>HQ</span></span>
+      <span class="proof-logo">Relay<span>soft</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SERVICES ──────────────────────────────────────────────── -->
+<section id="services" class="section section-cream">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag section-tag--violet">What we build</span>
+      <h2 class="section-h2">THREE WAYS<br />WE GO DEEP</h2>
+      <p class="section-sub">
+        We don't spread thin across every stack. We've gone deep on three
+        disciplines — and the results speak for themselves.
+      </p>
+    </div>
+    <div class="services-grid">
+
+      <div class="service-card">
+        <div class="service-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+        </div>
+        <h3 class="service-title">Mobile Apps</h3>
+        <p class="service-desc">
+          iOS and Android apps your users will actually love — built with React Native
+          or native Swift/Kotlin when performance demands it. We handle App Store submissions,
+          push notifications, offline sync, and everything in between.
+        </p>
+        <div class="service-tags">
+          <span class="service-tag">React Native</span>
+          <span class="service-tag">iOS / Swift</span>
+          <span class="service-tag">Android / Kotlin</span>
+          <span class="service-tag">Flutter</span>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <h3 class="service-title">Web Applications</h3>
+        <p class="service-desc">
+          Complex dashboards, SaaS platforms, and data-heavy interfaces built to scale.
+          From multi-tenant architectures to real-time collaboration tools, we've built
+          the hard stuff — and we're not fazed by your requirements.
+        </p>
+        <div class="service-tags">
+          <span class="service-tag">React / Next.js</span>
+          <span class="service-tag">Node.js</span>
+          <span class="service-tag">PostgreSQL</span>
+          <span class="service-tag">AWS / GCP</span>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h3 class="service-title">Custom Software</h3>
+        <p class="service-desc">
+          Internal tools, workflow automation, legacy modernization, third-party integrations.
+          If your team is fighting with spreadsheets or drowning in manual processes,
+          we'll build the thing that fixes it — scoped, priced, and delivered.
+        </p>
+        <div class="service-tags">
+          <span class="service-tag">APIs &amp; Integrations</span>
+          <span class="service-tag">Automation</span>
+          <span class="service-tag">Data Pipelines</span>
+          <span class="service-tag">Legacy Migration</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── BENEFITS ─────────────────────────────────────────────── -->
+<section class="section section-dark">
+  <div class="container">
+    <div class="section-header section-header--center">
+      <span class="section-tag section-tag--dark">Why vertex</span>
+      <h2 class="section-h2" style="color:var(--white);">THE AGENCY<br />ADVANTAGE</h2>
+      <p class="section-sub" style="margin:0 auto;">
+        Most dev shops disappear after kickoff. We stay close — because your
+        success is the only metric that matters to us.
+      </p>
+    </div>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-num">01</div>
+        <h3 class="benefit-title">Fixed-Price Contracts</h3>
+        <p class="benefit-desc">No hourly surprises. We scope your project before we write a line of code and hold ourselves to the number.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-num">02</div>
+        <h3 class="benefit-title">Delivery Guarantee</h3>
+        <p class="benefit-desc">If we miss the agreed milestone, you don't pay for that sprint. It's in writing. We haven't paid out yet.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-num">03</div>
+        <h3 class="benefit-title">You Own Everything</h3>
+        <p class="benefit-desc">Full source code, all IP, all credentials — transferred to you on day one of production. No lock-in, ever.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-num">04</div>
+        <h3 class="benefit-title">Dedicated PM</h3>
+        <p class="benefit-desc">One person who knows your project inside-out, answers within the hour, and proactively flags blockers before they become problems.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-num">05</div>
+        <h3 class="benefit-title">Battle-Tested Stack</h3>
+        <p class="benefit-desc">We don't prototype with the latest shiny thing. Our stack choices are boring, stable, and proven across 120+ production deployments.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-num">06</div>
+        <h3 class="benefit-title">Post-Launch Support</h3>
+        <p class="benefit-desc">Every project includes 60 days of post-launch support at no charge. Because shipping is just the beginning.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PROCESS ───────────────────────────────────────────────── -->
+<section id="process" class="section section-white">
+  <div class="container">
+    <div class="process-two-col" style="display:grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items:start;">
+      <div>
+        <span class="section-tag section-tag--violet">How it works</span>
+        <h2 class="section-h2">FROM IDEA<br />TO LAUNCH<br />IN FOUR<br />STEPS</h2>
+        <p class="section-sub">
+          We've refined this process across 120 projects. No surprises.
+          No heroics. Just predictable execution.
+        </p>
+      </div>
+      <div class="process-steps">
+        <div class="process-step">
+          <div class="process-step-num">01</div>
+          <div class="process-step-body">
+            <div class="process-step-badge">Week 1 — Free</div>
+            <h3 class="process-step-title">Discovery Call</h3>
+            <p class="process-step-desc">30 minutes with your PM. We map your requirements, ask the hard questions, and identify hidden complexity before it bites you.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="process-step-num">02</div>
+          <div class="process-step-body">
+            <div class="process-step-badge">Week 1–2</div>
+            <h3 class="process-step-title">Scoping & Proposal</h3>
+            <p class="process-step-desc">We produce a detailed technical spec, timeline, and fixed-price proposal. You review, we refine, we sign — all before writing a line of code.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="process-step-num">03</div>
+          <div class="process-step-body">
+            <div class="process-step-badge">Weeks 2–N</div>
+            <h3 class="process-step-title">Build, in Public</h3>
+            <p class="process-step-desc">Two-week sprints with a working demo at the end of each one. You see real progress, not slide decks. Feedback loops are tight.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="process-step-num">04</div>
+          <div class="process-step-body">
+            <div class="process-step-badge">Launch day</div>
+            <h3 class="process-step-title">Launch & Handover</h3>
+            <p class="process-step-desc">We deploy together, hand over all assets, and stay available for 60 days post-launch. Your team is trained; your docs are written.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICING ───────────────────────────────────────────────── -->
+<section id="pricing" class="section section-dark">
+  <div class="container">
+    <div class="section-header section-header--center">
+      <span class="section-tag section-tag--dark">Transparent pricing</span>
+      <h2 class="section-h2" style="color:var(--white);">NO SURPRISE<br />INVOICES</h2>
+      <p class="section-sub" style="margin:0 auto;">
+        Fixed-price engagements. Scope it once, sign it once, pay in milestones.
+        All tiers include full source code ownership.
+      </p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- Starter -->
+      <div class="pricing-card">
+        <p class="pricing-tier">Starter</p>
+        <p class="pricing-price-from">From</p>
+        <p class="pricing-price">$15K</p>
+        <p class="pricing-desc">
+          Best for focused MVPs and internal tools. Get to market fast with a lean,
+          well-built product. Perfect for validating your idea with real users.
+        </p>
+        <ul class="pricing-features">
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Up to 6 core screens / endpoints
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            4–8 week delivery
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            1 developer + PM
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            30-day post-launch support
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Full source code + IP transfer
+          </li>
+        </ul>
+        <a href="#contact" class="btn-pricing btn-pricing--outline">Get a Free Estimate</a>
+      </div>
+
+      <!-- Growth — featured -->
+      <div class="pricing-card pricing-card--featured">
+        <div class="pricing-badge">Most Popular</div>
+        <p class="pricing-tier">Growth</p>
+        <p class="pricing-price-from">From</p>
+        <p class="pricing-price">$35K</p>
+        <p class="pricing-desc">
+          Full-featured product with auth, payments, admin dashboard, and mobile.
+          The package most funded startups and scaling businesses choose.
+        </p>
+        <ul class="pricing-features">
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Unlimited screens / endpoints
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            8–14 week delivery
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Full team (2–3 devs + PM + QA)
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Auth, payments, analytics included
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            60-day post-launch support
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Priority response SLA
+          </li>
+        </ul>
+        <a href="#contact" class="btn-pricing btn-pricing--white">Book a Discovery Call</a>
+      </div>
+
+      <!-- Scale -->
+      <div class="pricing-card">
+        <p class="pricing-tier">Scale</p>
+        <p class="pricing-price-from">&nbsp;</p>
+        <p class="pricing-price" style="font-size:48px; line-height:1.1;">Custom</p>
+        <p class="pricing-desc">
+          Ongoing engineering partnership for companies that need a committed,
+          senior team embedded in their process — not a rotating roster of contractors.
+        </p>
+        <ul class="pricing-features">
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Dedicated team, monthly retainer
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Architecture leadership included
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            24/7 incident response
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Quarterly roadmap planning
+          </li>
+          <li class="pricing-feature">
+            <svg class="pricing-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Works alongside your in-house team
+          </li>
+        </ul>
+        <a href="#contact" class="btn-pricing btn-pricing--outline">Talk to Us</a>
+      </div>
+
+    </div>
+
+    <!-- Guarantee -->
+    <div class="guarantee-bar">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <p>
+        <strong>30-day money-back guarantee</strong> — if we don't deliver a working prototype
+        within the first sprint, you pay nothing. No questions, no negotiation.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── TESTIMONIALS ──────────────────────────────────────────── -->
+<section id="testimonials" class="section section-cream">
+  <div class="container">
+    <div class="section-header section-header--center">
+      <span class="section-tag section-tag--violet">Client stories</span>
+      <h2 class="section-h2">DON'T TAKE<br />OUR WORD FOR IT</h2>
+    </div>
+    <div class="testimonials-grid">
+
+      <div class="testimonial-card">
+        <div class="testimonial-stars">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <p class="testimonial-body">
+          "We'd been burned twice by freelancers who went dark after deposit. Vertex scoped
+          everything in week one, gave us a fixed price, and hit every sprint demo. We went
+          live three days ahead of schedule. I've already referred two founders."
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">MR</div>
+          <div>
+            <p class="testimonial-name">Marcus Reid</p>
+            <p class="testimonial-role">CEO, Arctis — B2B SaaS Platform</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-stars">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <p class="testimonial-body">
+          "Our internal ops tool was stuck in spreadsheet hell — team of 40 people,
+          all working off the same Google Sheet. Vertex built us a proper dashboard
+          in six weeks. We got 4 hours back per person per week on day one."
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">SP</div>
+          <div>
+            <p class="testimonial-name">Sofia Park</p>
+            <p class="testimonial-role">COO, Novapath — Logistics Operations</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-stars">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <p class="testimonial-body">
+          "We needed a React Native app with offline sync, BLE integration, and a
+          complex data model — and we needed it in 10 weeks to hit our trade show demo.
+          They delivered with two weeks to spare. Technical quality was genuinely impressive."
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">JC</div>
+          <div>
+            <p class="testimonial-name">James Chen</p>
+            <p class="testimonial-role">CTO, Lumensio — IoT Hardware/Software</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── FAQ ────────────────────────────────────────────────────── -->
+<section id="faq" class="section section-white">
+  <div class="container">
+    <div class="faq-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:start;">
+      <div class="faq-sticky" style="position:sticky; top:120px;">
+        <span class="section-tag section-tag--violet">Questions</span>
+        <h2 class="section-h2">THE HONEST<br />ANSWERS</h2>
+        <p class="section-sub">
+          Most agencies dodge the hard questions. We'd rather answer them up front
+          so you don't waste time in a call finding out.
+        </p>
+        <div style="margin-top:40px;">
+          <a href="#contact" class="btn-primary" style="background:var(--ink); color:var(--white);">Still have questions? Talk to us →</a>
+        </div>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-question">
+            How long does a typical project take?
+            <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">MVPs typically run 4–8 weeks. Full-featured products are usually 10–16 weeks. We don't give you a timeline until we've properly scoped your project — vague estimates are just lying with extra steps. After the discovery call, you'll have a week-by-week plan.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            What exactly is covered in the fixed price?
+            <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Everything in the agreed scope: design, development, QA testing, deployment, documentation, and 60 days of post-launch support (30 days on Starter). If scope changes, we discuss and agree before any work starts. You'll never get a surprise invoice.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            Do we own the code and IP?
+            <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">100%. Full source code, all design files, all credentials, all third-party accounts — transferred to you. We retain no rights, no licenses, no ability to use your code elsewhere. Our contract is explicit on this. Ask to see the IP clause before you sign.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            What technologies do you work with?
+            <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Our core stack: React / Next.js, React Native, Node.js, TypeScript, PostgreSQL, AWS and GCP. For mobile, we also do native Swift and Kotlin when performance is critical. We'll recommend the right stack for your needs — not the one we find easiest to build.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            Can you work with our existing development team?
+            <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Yes. We're comfortable pairing with in-house engineers, taking over repos mid-build, or augmenting a team that's stretched thin. We use standard tooling (GitHub, Linear, Slack) and follow your conventions — not the other way around.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            What if I need changes after launch?
+            <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Bug fixes within the spec are covered in your support window at no charge. New features or scope expansions are quoted as a new (smaller) project or transitioned to a retainer. Most clients stick around — we make that easy and fairly priced.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            How do you handle communication and progress updates?
+            <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">You get a dedicated Slack channel, weekly written updates, biweekly sprint demos, and a shared project board in Linear. Your PM responds within business hours. We don't disappear for weeks and surface with a product you didn't ask for.</div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            What's the minimum budget you work with?
+            <span class="faq-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Our minimum engagement is $15,000. Below that, we can't staff the project properly — and we'd rather be honest about that than take your money and deliver something that disappoints. If your budget is below $15K, we're happy to point you toward the right resources.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CONTACT FORM ───────────────────────────────────────────── -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-wrap">
+      <div class="contact-info">
+        <span class="section-tag section-tag--dark">Start a project</span>
+        <h2 class="section-h2" style="color:var(--white); margin-top:4px;">LET'S BUILD<br />SOMETHING<br />REAL.</h2>
+        <p style="color:rgba(255,255,255,0.5); font-size:17px; line-height:1.7; margin-top:16px; max-width:400px;">
+          Fill out the form and your PM will be in touch within one business day.
+          No sales deck. Just a real conversation about your project.
+        </p>
+        <div class="contact-promise">
+          <div class="contact-promise-item">
+            <div class="contact-promise-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="contact-promise-text">
+              <h4>Response within 1 business day</h4>
+              <p>You'll hear from a human, not an auto-responder.</p>
+            </div>
+          </div>
+          <div class="contact-promise-item">
+            <div class="contact-promise-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="contact-promise-text">
+              <h4>Free 30-minute discovery call</h4>
+              <p>No pitch. Just a scoping conversation with an engineer.</p>
+            </div>
+          </div>
+          <div class="contact-promise-item">
+            <div class="contact-promise-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="contact-promise-text">
+              <h4>No commitment required</h4>
+              <p>We'll scope your project for free. Sign only if you love the proposal.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="form-card">
+          <form id="contactForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="name">Full name</label>
+                <input class="form-input" type="text" id="name" name="name" placeholder="Alex Johnson" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="email">Work email</label>
+                <input class="form-input" type="email" id="email" name="email" placeholder="alex@company.com" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="company">Company</label>
+              <input class="form-input" type="text" id="company" name="company" placeholder="Company name" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="project_type">Project type</label>
+              <select class="form-input" id="project_type" name="project_type" required>
+                <option value="" disabled selected>Select what you're building…</option>
+                <option value="mobile_app">Mobile app (iOS / Android)</option>
+                <option value="web_app">Web application / SaaS</option>
+                <option value="custom_software">Custom software / internal tool</option>
+                <option value="api_integration">API or third-party integration</option>
+                <option value="mvp">MVP / early-stage product</option>
+                <option value="other">Something else — I'll explain</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:28px;">
+              <label class="form-label" for="message">Tell us about your project</label>
+              <textarea class="form-input" id="message" name="message" rows="4" placeholder="What are you building? What problem does it solve? Any timeline or budget in mind?" style="resize:vertical; min-height:110px;"></textarea>
+            </div>
+            <button type="submit" class="form-submit">Get a Free Estimate →</button>
+            <p class="form-disclaimer">By submitting, you agree to be contacted about your project. No spam, ever. We respect your privacy.</p>
+          </form>
+          <div class="form-success" id="formSuccess">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <h3>You're in the queue.</h3>
+            <p>We'll review your project and reach out within one business day. Talk soon.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FINAL CTA ──────────────────────────────────────────────── -->
+<section id="cta-final">
+  <div class="container">
+    <p class="hero-eyebrow" style="justify-content:center; margin-bottom:20px;">
+      <span class="hero-eyebrow-dot"></span>
+      Ready when you are
+    </p>
+    <h2 class="cta-final-h2">YOUR IDEA<br />DESERVES A<br /><em>REAL TEAM.</em></h2>
+    <p class="cta-final-sub">
+      Stop watching your vision get diluted by bad hires and disappearing freelancers.
+      Let's build something you're proud to show people.
+    </p>
+    <div class="cta-final-actions">
+      <a href="#contact" class="btn-primary-dark">Book a Discovery Call →</a>
+      <a href="#pricing" class="btn-outline-dark">View pricing</a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="footer-logo">Vertex</a>
+        <p class="footer-tagline">Custom software for businesses that need it done right.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="#services">Mobile Apps</a></li>
+            <li><a href="#services">Web Applications</a></li>
+            <li><a href="#services">Custom Software</a></li>
+            <li><a href="#services">Integrations &amp; APIs</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#process">How we work</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#testimonials">Case studies</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="#contact">Get an estimate</a></li>
+            <li><a href="#contact">Book a call</a></li>
+            <li><a href="mailto:hello@vertexbuilt.com">hello@vertexbuilt.com</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 Vertex Software. All rights reserved.</p>
+      <span class="footer-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        120+ projects shipped
+      </span>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── JS ─────────────────────────────────────────────────────── -->
+<script>
+  // Sticky nav on scroll
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+
+  // Mobile nav toggle
+  const burger = document.getElementById('navBurger');
+  const mobileNav = document.getElementById('navMobile');
+  burger.addEventListener('click', () => {
+    burger.classList.toggle('open');
+    mobileNav.classList.toggle('open');
+  });
+  mobileNav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      burger.classList.remove('open');
+      mobileNav.classList.remove('open');
+    });
+  });
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  // Form submit (client-side only demo)
+  document.getElementById('contactForm').addEventListener('submit', e => {
+    e.preventDefault();
+    document.getElementById('contactForm').style.display = 'none';
+    document.getElementById('formSuccess').style.display = 'block';
+  });
+</script>
+
+</body>
+</html>
